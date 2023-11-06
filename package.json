@@ -1,0 +1,57 @@
+{
+  "name": "@oomol-lab/sparse-file",
+  "version": "0.0.1",
+  "description": "Create / Resize sparse file",
+  "main": "src/index.ts",
+  "module": "src/index.ts",
+  "types": "src/index.ts",
+  "publishConfig": {
+    "main": "out/index.js",
+    "module": "out/index.mjs",
+    "types": "out/index.d.ts"
+  },
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./out/index.d.mts",
+        "default": "./out/index.mjs"
+      },
+      "require": {
+        "types": "./out/index.d.ts",
+        "default": "./out/index.js"
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsup-node",
+    "lint": "eslint .",
+    "ts-check": "tsc --noEmit",
+    "test": "vitest run",
+    "test:ui": "vitest --ui"
+  },
+  "keywords": [
+    "oomol",
+    "truncate",
+    "sparse",
+    "sparsefile",
+    "sparse-file"
+  ],
+  "files": [
+    "out",
+    "src",
+    "!src/**/*.test.ts"
+  ],
+  "author": "BlackHole1 <bh@bugs.cc>",
+  "license": "MIT",
+  "devDependencies": {
+    "@oomol-lab/eslint-config-basic": "^0.0.1",
+    "@oomol-lab/eslint-config-ts": "^0.0.2",
+    "@oomol-lab/tsconfig": "^0.0.1",
+    "@types/node": "^20.8.10",
+    "@vitest/coverage-v8": "^0.34.6",
+    "@vitest/ui": "^0.34.6",
+    "tsup": "^7.2.0",
+    "typescript": "^5.2.2",
+    "vitest": "^0.34.6"
+  }
+}
