@@ -4,6 +4,7 @@ words:
   - tsup
   - sparsefile
   - treeshake
+  - lcov
 dictionaries:
   - companies
   - softwareTerms

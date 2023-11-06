@@ -1,0 +1,8 @@
+*.ts text eol=lf
+*.js text eol=lf
+*.json text eol=lf
+*.json5 text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.md text eol=lf
+*.editorconfig text eol=lf

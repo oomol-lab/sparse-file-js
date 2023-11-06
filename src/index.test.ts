@@ -10,6 +10,24 @@ interface TestContext {
     file: string;
 }
 
+/**
+ * Override Number.MAX_SAFE_INTEGER.
+ * Because in certain systems (such as the Ubuntu system in GitHub Actions),
+ * it is not allowed to set extremely large files, even if they are sparse files.
+ */
+const gn = global.Number;
+function Number(...args: any[]) {
+    return gn(...args);
+}
+Object.setPrototypeOf(Number, class NumberClass extends global.Number {
+    public static override get MAX_SAFE_INTEGER(): number {
+        return 1024 * 1024 * 50;
+    }
+});
+global.Number = Number as unknown as NumberConstructor;
+const MAX_SAFE_INTEGER = global.Number.MAX_SAFE_INTEGER;
+
+
 beforeEach<TestContext>(async (ctx) => {
     const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "sparse-file-"));
     ctx.cwd = tmpDir;
@@ -44,7 +62,7 @@ describe.concurrent("create sparse with safe mode", () => {
     });
 
     it<TestContext>("should throw error when size > Number.MAX_SAFE_INTEGER", async (ctx) => {
-        await expect(createSparse(ctx.file, Number.MAX_SAFE_INTEGER + 1)).rejects.toThrow(ERR_GT_MAX_SAFE_INTEGER);
+        await expect(createSparse(ctx.file, MAX_SAFE_INTEGER + 1)).rejects.toThrow(ERR_GT_MAX_SAFE_INTEGER);
     });
 
     it<TestContext>("do nothing when filesize == pass size param", async (ctx) => {
@@ -93,12 +111,12 @@ describe("create sparse without safe mode", () => {
             size: 1,
         });
 
-        await createSparse(ctx.file, Number.MAX_SAFE_INTEGER + 1, {
+        await createSparse(ctx.file, MAX_SAFE_INTEGER + 1, {
             safe: false,
         });
 
         await expect(fs.stat(ctx.file)).resolves.toMatchObject({
-            size: Number.MAX_SAFE_INTEGER,
+            size: MAX_SAFE_INTEGER,
         });
     });
 });
