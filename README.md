@@ -31,7 +31,8 @@ pnpm add @oomol-lab/sparse-file
 * `filepath`: string - Sparse file paths to create/resize
 * `size`: number - Sparse file size
 * `options?.safe`: boolean - Safe mode, default: true
-* `options?.mode`: number - File mode, default: 0o644
+* `options?.mode`: number - File mode. By default, the mode is only set when creating a file, unless overwriteMode is specified. default: 0o644
+* `options?.overwriteMode`: boolean - Overwrite mode. When the overwrite mode is allowed, the mode will be set even if the file exists. default: false
 
 In safe mode, an error will occur if the size is less than 0 or greater than `Number.MAX_SAFE_INTEGER`. Additionally, it will be rejected if the passed size is larger than the current file size.
 
