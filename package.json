@@ -1,6 +1,6 @@
 {
   "name": "@oomol-lab/sparse-file",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Create / Resize sparse file",
   "main": "src/index.ts",
   "module": "src/index.ts",
