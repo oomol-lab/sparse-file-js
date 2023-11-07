@@ -121,14 +121,79 @@ describe("create sparse without safe mode", () => {
     });
 });
 
-it.concurrent<TestContext>("create sparse with custom mode", async (ctx) => {
-    await createSparse(ctx.file, 1, {
-        mode: 0o600,
+describe("custom mode", () => {
+    it.concurrent<TestContext>("create sparse with custom mode", async (ctx) => {
+        await createSparse(ctx.file, 1, {
+            mode: 0o600,
+        });
+
+        const stat = await fs.stat(ctx.file);
+
+        expect(stat.mode & 0o777).eq(0o600);
     });
 
-    const stat = await fs.stat(ctx.file);
+    it.concurrent<TestContext>("should overwrite mode", async (ctx) => {
+        {
+            const fh = await fs.open(ctx.file, "w", 0o644);
+            await fh.writeFile(Buffer.alloc(1));
+            await fh.sync();
+            await fh.close();
+        }
 
-    expect(stat.mode & 0o777).eq(0o600);
+        await createSparse(ctx.file, 10, {
+            mode: 0o600,
+            overwriteMode: true,
+        });
+        const stat = await fs.stat(ctx.file);
+        expect(stat.mode & 0o777).eq(0o600);
+    });
+
+    it.concurrent<TestContext>("should overwrite mode when size same", async (ctx) => {
+        {
+            const fh = await fs.open(ctx.file, "w", 0o644);
+            await fh.writeFile(Buffer.alloc(1));
+            await fh.sync();
+            await fh.close();
+        }
+
+        await createSparse(ctx.file, 1, {
+            mode: 0o600,
+            overwriteMode: true,
+        });
+        const stat = await fs.stat(ctx.file);
+        expect(stat.mode & 0o777).eq(0o600);
+    });
+
+    it.concurrent<TestContext>("should maintain the original mode", async (ctx) => {
+        {
+            const fh = await fs.open(ctx.file, "w", 0o644);
+            await fh.writeFile(Buffer.alloc(1));
+            await fh.sync();
+            await fh.close();
+        }
+
+        await createSparse(ctx.file, 10, {
+            mode: 0o600,
+            overwriteMode: true,
+        });
+        const stat = await fs.stat(ctx.file);
+        expect(stat.mode & 0o777).eq(0o600);
+    });
+
+    it.concurrent<TestContext>("should overwrite mode when use default mode", async (ctx) => {
+        {
+            const fh = await fs.open(ctx.file, "w", 0o600);
+            await fh.writeFile(Buffer.alloc(1));
+            await fh.sync();
+            await fh.close();
+        }
+
+        await createSparse(ctx.file, 1, {
+            overwriteMode: true,
+        });
+        const stat = await fs.stat(ctx.file);
+        expect(stat.mode & 0o777).eq(0o644);
+    });
 });
 
 describe.concurrent("physical file size", () => {
@@ -138,7 +203,7 @@ describe.concurrent("physical file size", () => {
         expect(await physicalFileSize(ctx.file)).eq(0);
     });
 
-    it<TestContext>("should return 0 when file is empty sparsefile", async (ctx) => {
+    it<TestContext>("should return actual size when file not is empty sparsefile", async (ctx) => {
         const fh = await fs.open(ctx.file, "w");
         const { blksize } = await fh.stat();
         await fh.write(Buffer.alloc(1));

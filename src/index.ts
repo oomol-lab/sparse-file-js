@@ -7,13 +7,20 @@ export interface SparseOptions {
      */
     safe?: boolean;
     /**
+     * By default, the mode is only set when creating a file, unless overwriteMode is specified.
      * @default 0o644
      */
     mode?: number;
+    /**
+     * When the overwrite mode is allowed, the mode will be set even if the file exists.
+     * @default false
+     */
+    overwriteMode?: boolean;
 }
 
 export const createSparse = async (filepath: string, size: number, options?: SparseOptions): Promise<void> => {
-    const fh = await open(filepath, options?.mode || 0o644);
+    const mode = options?.mode || 0o644;
+    const fh = await open(filepath, mode);
 
     const curState = await fs.stat(filepath);
     if (options?.safe !== false) {
@@ -33,6 +40,9 @@ export const createSparse = async (filepath: string, size: number, options?: Spa
         }
 
         if (curState.size === size) {
+            if (options?.overwriteMode) {
+                await fh.chmod(mode);
+            }
             await fh.close();
             return;
         }
@@ -45,6 +55,9 @@ export const createSparse = async (filepath: string, size: number, options?: Spa
     }
 
     await fh.truncate(size);
+    if (options?.overwriteMode) {
+        await fh.chmod(mode);
+    }
     await fh.sync();
     await fh.close();
 };
